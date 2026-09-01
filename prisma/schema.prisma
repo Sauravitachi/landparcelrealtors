@@ -1,0 +1,156 @@
+// Prisma schema for LandParcel Realtors
+// Full-Stack Real Estate Web Application
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  BUYER
+  AGENT
+  ADMIN
+}
+
+enum PropertyType {
+  VILLA
+  APARTMENT
+  PLOT
+  COMMERCIAL
+  PENTHOUSE
+}
+
+enum ListingType {
+  SALE
+  RENT
+}
+
+enum FurnishingStatus {
+  FURNISHED
+  SEMI_FURNISHED
+  UNFURNISHED
+}
+
+enum PropertyStatus {
+  PENDING
+  APPROVED
+  SOLD
+  RENTED
+  REJECTED
+}
+
+enum InquiryStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  phone         String?
+  passwordHash  String
+  role          Role           @default(BUYER)
+  avatar        String?
+  companyName   String?
+  licenseNumber String?
+  bio           String?
+  isVerified    Boolean        @default(false)
+  isBlocked     Boolean        @default(false)
+  properties    Property[]
+  inquiries     Inquiry[]
+  wishlists     Wishlist[]
+  savedSearches SavedSearch[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Property {
+  id               String           @id @default(cuid())
+  title            String
+  description      String
+  price            Float
+  propertyType     PropertyType
+  listingType      ListingType
+  city             String
+  locality         String
+  address          String
+  lat              Float
+  lng              Float
+  bedrooms         Int              @default(0)
+  bathrooms        Int              @default(0)
+  areaSqFt         Float
+  carpetArea       Float?
+  facing           String?          // North, East, West, South, North-East, etc.
+  parking          Int              @default(1)
+  propertyAge      String?          // "New Launch", "Under Construction", "1-3 Years", etc.
+  maintenanceFee   Float?
+  floor            Int?
+  totalFloors      Int?
+  furnishingStatus FurnishingStatus @default(UNFURNISHED)
+  status           PropertyStatus   @default(APPROVED)
+  featured         Boolean          @default(false)
+  verified         Boolean          @default(true)
+  images           String[]
+  amenities        String[]
+  ownerId          String
+  owner            User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  inquiries        Inquiry[]
+  wishlists        Wishlist[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([city])
+  @@index([propertyType])
+  @@index([listingType])
+  @@index([price])
+  @@index([status])
+}
+
+model Inquiry {
+  id         String        @id @default(cuid())
+  propertyId String
+  property   Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  userId     String?
+  user       User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name       String
+  email      String
+  phone      String
+  message    String
+  visitDate  String?
+  visitTime  String?
+  visitType  String?       @default("IN_PERSON") // IN_PERSON, VIDEO_CALL
+  status     InquiryStatus @default(PENDING)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@index([propertyId])
+  @@index([userId])
+}
+
+model Wishlist {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, propertyId])
+}
+
+model SavedSearch {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  filtersJson String
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
