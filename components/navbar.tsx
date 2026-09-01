@@ -132,6 +132,10 @@ export function Navbar() {
               href="/dashboard?tab=wishlist"
               className="relative p-2 text-slate-700 hover:text-slate-900"
             >
+
+
+
+              
               <Heart className="h-5 w-5" />
               {wishlistCount > 0 && (
                 <span className="absolute 1 top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-600 text-[9px] font-bold text-white">
