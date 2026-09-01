@@ -8,6 +8,7 @@ interface EMICalculatorProps {
   initialPrice?: number;
 }
 
+
 export function EMICalculator({ initialPrice = 15000000 }: EMICalculatorProps) {
   const [propertyPrice, setPropertyPrice] = useState<number>(initialPrice);
   const [downPaymentPercent, setDownPaymentPercent] = useState<number>(20);
